@@ -1,0 +1,27 @@
+{
+  "name": "bangladesh-tsc-directory-app",
+  "version": "1.0.0",
+  "description": "১৫৫টি সরকারি টেকনিক্যাল স্কুল ও কলেজের কর্মকর্তা, শিক্ষক ও কর্মচারী ডিরেক্টরি অ্যান্ড্রয়েড মোবাইল অ্যাপ",
+  "main": "www/index.html",
+  "scripts": {
+    "start": "python auto_sync_companion.py",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "keywords": [
+    "tsc",
+    "dte",
+    "bteb",
+    "bangladesh",
+    "android",
+    "directory"
+  ],
+  "author": "TSC Bangladesh",
+  "license": "MIT"
+}

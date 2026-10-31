@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>বাংলাদেশ ১৫৫ টিএসসি ডিরেক্টরি — কর্মকর্তা ও শিক্ষক তালিকা</title>
+  
+  <!-- Android & Web App Meta -->
+  <meta name="theme-color" content="#0d9488">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Bengali Font: Hind Siliguri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top App Bar -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand-wrapper">
+        <div class="brand-icon">🏛️</div>
+        <div>
+          <div class="brand-title">বাংলাদেশ টিএসসি ডিরেক্টরি</div>
+          <div class="brand-subtitle">১৫৫ সরকারি টেকনিক্যাল স্কুল ও কলেজ</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="icon-btn" onclick="window.TSC_APP.toggleTheme()" title="ডার্ক মোড পরিবর্তন">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Search Bar -->
+  <div class="search-container">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="শিক্ষক, কর্মকর্তা বা কলেজের নাম লিখুন..." autocomplete="off">
+      <button id="clear-search" class="clear-search" title="ক্লিয়ার করুন">✕</button>
+    </div>
+  </div>
+
+  <!-- Role Filter Chips (For Directory & Favorites) -->
+  <div class="filter-scroll-wrapper" id="role-chips" style="display: none;">
+    <button class="filter-chip active" data-role="all">সব পদবী</button>
+    <button class="filter-chip" data-role="principal">👔 অধ্যক্ষ</button>
+    <button class="filter-chip" data-role="instructor">👨‍🏫 ইন্সট্রাক্টর</button>
+    <button class="filter-chip" data-role="junior_instructor">📘 জুনিয়র ইন্সট্রাক্টর</button>
+    <button class="filter-chip" data-role="staff">👥 কর্মচারী</button>
+  </div>
+
+  <!-- Division & District Dropdowns -->
+  <div class="filter-dropdowns">
+    <select id="filter-division" class="filter-select">
+      <option value="all">সব বিভাগ (All Divisions)</option>
+    </select>
+    <select id="filter-district" class="filter-select">
+      <option value="all">সব জেলা (All Districts)</option>
+    </select>
+  </div>
+
+  <!-- Stats Banner -->
+  <div class="stats-banner">
+    <span id="stats-text">মোট প্রতিষ্ঠান: <span class="stats-count">১৫৫</span> টি</span>
+    <span style="font-size: 11px; opacity: 0.8;">অফলাইন প্রস্তুত ⚡</span>
+  </div>
+
+  <!-- Main Views Container -->
+  <main class="main-content">
+    
+    <!-- View 1: Institutions List -->
+    <section id="view-institutions" class="view-section active">
+      <div id="tsc-grid" class="tsc-grid"></div>
+    </section>
+
+    <!-- View 2: All Officers Directory -->
+    <section id="view-directory" class="view-section">
+      <div id="officer-list" class="officer-list"></div>
+      <div id="load-more-container" style="display:none;">
+        <button id="load-more-btn" class="load-more-btn">আরও দেখুন (Load More)</button>
+      </div>
+    </section>
+
+    <!-- View 3: Favorites -->
+    <section id="view-favorites" class="view-section">
+      <div id="officer-list" class="officer-list"></div>
+    </section>
+
+    <!-- View 4: About / App Info -->
+    <section id="view-about" class="view-section">
+      <div class="tsc-card" style="margin-bottom: 14px;">
+        <div style="font-size: 16px; font-weight: 700; color: var(--primary);">📱 বাংলাদেশ ১৫৫ টিএসসি ডিরেক্টরি অ্যাপ</div>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 6px;">
+          এই মোবাইল অ্যাপ্লিকেশনের মাধ্যমে বাংলাদেশ কারিগরি শিক্ষা অধিদপ্তর (DTE)-এর আওতাধীন ১৫৫টি সরকারি টেকনিক্যাল স্কুল ও কলেজের (TSC) সকল অধ্যক্ষ, ইন্সট্রাক্টর, শিক্ষক ও কর্মকর্তা-কর্মচারীদের হালনাগাদ ফোন নম্বর ও ইমেইল দ্রুত খুঁজে পাওয়া যাবে।
+        </p>
+      </div>
+
+      <div class="tsc-card" style="margin-bottom: 14px;">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">✨ অ্যাপের বিশেষ সুবিধাসমূহ</div>
+        <ul style="font-size: 13px; color: var(--text-muted); line-height: 1.8; padding-left: 20px;">
+          <li>⚡ <strong>১০০% অফলাইন:</strong> ইন্টারনেট সংযোগ ছাড়াও যেকোনো সময় সব তথ্য পাওয়া যাবে।</li>
+          <li>📞 <strong>১-ক্লিকে সরাসরি কল:</strong> নম্বর না তুলেই সরাসরি ফোন করার সুবিধা।</li>
+          <li>💬 <strong>WhatsApp চ্যাট:</strong> নম্বর সেভ না করেই সরাসরি WhatsApp-এ বার্তা পাঠানোর সুবিধা।</li>
+          <li>⭐ <strong>বুকমার্ক/প্রিয় তালিকা:</strong> প্রয়োজনীয় শিক্ষকদের স্টার করে আলাদা সংরক্ষণ করা যায়।</li>
+          <li>🌓 <strong>ডার্ক ও লাইট মোড:</strong> চোখের আরামদায়ক থিম পরিবর্তন।</li>
+        </ul>
+      </div>
+
+      <div class="tsc-card">
+        <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">🌐 প্রয়োজনীয় লিংক</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+          <a href="http://www.techedu.gov.bd" target="_blank" style="color: var(--primary); text-decoration: none;">🔗 কারিগরি শিক্ষা অধিদপ্তর (DTE)</a>
+          <a href="http://www.bteb.gov.bd" target="_blank" style="color: var(--primary); text-decoration: none;">🔗 বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB)</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar (Mobile App Style) -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-tab="institutions">
+      <span class="nav-tab-icon">🏛️</span>
+      <span>প্রতিষ্ঠান</span>
+    </button>
+    <button class="nav-tab" data-tab="directory">
+      <span class="nav-tab-icon">👥</span>
+      <span>শিক্ষক তালিকা</span>
+    </button>
+    <button class="nav-tab" data-tab="favorites">
+      <span class="nav-tab-icon">⭐</span>
+      <span>সংরক্ষিত</span>
+    </button>
+    <button class="nav-tab" data-tab="about">
+      <span class="nav-tab-icon">ℹ️</span>
+      <span>তথ্য</span>
+    </button>
+  </nav>
+
+  <!-- College Detail Sheet / Modal -->
+  <div id="college-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div>
+          <div id="sheet-title" class="sheet-title">কলেজের নাম</div>
+          <div id="sheet-subtitle" class="sheet-subtitle">জেলা ও বিভাগ</div>
+        </div>
+        <button class="sheet-close" onclick="window.TSC_APP.closeCollegeModal()">✕</button>
+      </div>
+      <div class="sheet-tabs">
+        <button id="modal-tab-officers" class="sheet-tab-btn active" onclick="window.TSC_APP.switchModalTab('officers')">শিক্ষক ও কর্মকর্তা</button>
+        <button id="modal-tab-staff" class="sheet-tab-btn" onclick="window.TSC_APP.switchModalTab('staff')">কর্মচারী</button>
+      </div>
+      <div id="sheet-body" class="sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">কপি করা হয়েছে!</div>
+
+  <!-- Data & Application Logic -->
+  <script src="data/tsc_data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

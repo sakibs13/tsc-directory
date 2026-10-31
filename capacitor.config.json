@@ -1,0 +1,15 @@
+{
+  "appId": "bd.gov.dte.tscdirectory",
+  "appName": "বাংলাদেশ ১৫৫ টিএসসি ডিরেক্টরি",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0d9488"
+    }
+  }
+}
