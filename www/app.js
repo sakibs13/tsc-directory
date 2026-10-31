@@ -2,6 +2,9 @@
   'use strict';
 
   // --- STATE ---
+  const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/tsc_data.json';
+  const LIVE_STORAGE_KEY = 'tsc_live_synced_data_v1';
+
   let rawData = window.TSC_DATA || [];
   let allOfficers = [];
   let activeTab = 'institutions'; // 'institutions', 'directory', 'favorites', 'about'
@@ -15,6 +18,17 @@
 
   // --- EXTRACT & FLATTEN DATA ---
   function initData() {
+    // Check if a newer live synced version exists in localStorage
+    try {
+      const cached = localStorage.getItem(LIVE_STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length >= 150) {
+          rawData = parsed;
+        }
+      }
+    } catch (_) {}
+
     allOfficers = [];
     rawData.forEach(inst => {
       // Add officers
@@ -572,12 +586,50 @@
     }
   }
 
+  // --- REMOTE GITHUB SYNC ---
+  async function syncFromGitHub(isManual = false) {
+    const syncBtn = document.getElementById('sync-data-btn');
+    if (syncBtn) syncBtn.classList.add('rotating');
+    if (isManual) showToast('ক্লাউড থেকে তথ্য চেক করা হচ্ছে...');
+
+    try {
+      const res = await fetch(GITHUB_RAW_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const freshData = await res.json();
+      if (Array.isArray(freshData) && freshData.length >= 150) {
+        const oldStr = localStorage.getItem(LIVE_STORAGE_KEY) || JSON.stringify(window.TSC_DATA || []);
+        const newStr = JSON.stringify(freshData);
+        if (oldStr !== newStr) {
+          localStorage.setItem(LIVE_STORAGE_KEY, newStr);
+          rawData = freshData;
+          initData();
+          if (activeTab === 'institutions') renderInstitutions();
+          else renderOfficers();
+          showToast('✨ সর্বশেষ তথ্য সফলভাবে হালনাগাদ হয়েছে!');
+        } else if (isManual) {
+          showToast('অ্যাপের তথ্য ইতিমধ্যে সম্পূর্ণ আপ-টু-ডেট আছে 👍');
+        }
+      }
+    } catch (err) {
+      console.warn('Live sync notice:', err);
+      if (isManual) showToast('ইন্টারনেট সংযোগ নেই, অফলাইন ডাটা সচল আছে।');
+    } finally {
+      if (syncBtn) syncBtn.classList.remove('rotating');
+    }
+  }
+
   // --- INITIALIZATION ---
   window.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initData();
     setupListeners();
     renderInstitutions();
+    // Silent background check if online
+    setTimeout(() => {
+      if (navigator.onLine) {
+        syncFromGitHub(false);
+      }
+    }, 2500);
   });
 
   // Global exposure for event handlers
@@ -589,6 +641,7 @@
     copyText,
     switchTab,
     toggleTheme,
+    syncFromGitHub,
     activeModalCollege: null
   };
 })();
