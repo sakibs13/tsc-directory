@@ -471,6 +471,43 @@ body {
   gap: 4px;
 }
 
+.officer-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.contact-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-pill.phone {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+.contact-pill.email {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.contact-pill.none {
+  background: var(--badge-bg);
+  color: var(--text-light);
+  font-weight: 400;
+}
+
 /* Action Buttons Bar on Mobile Card */
 .officer-actions {
   display: grid;

@@ -275,6 +275,10 @@
               <span>🏛️</span>
               <span>${off.collegeBn} (${off.district})</span>
             </div>
+            <div class="officer-contact-row">
+              ${hasPhone ? `<span class="contact-pill phone">📞 ${off.mobile}</span>` : '<span class="contact-pill none">📞 ফোন নম্বর নেই</span>'}
+              ${hasEmail ? `<span class="contact-pill email" title="${off.email}">✉️ ${off.email}</span>` : ''}
+            </div>
           </div>
         </div>
         <div class="officer-actions">
