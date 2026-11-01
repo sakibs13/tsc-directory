@@ -6,7 +6,7 @@
   const LIVE_STORAGE_KEY = 'tsc_live_synced_data_v1';
   const GITHUB_NOTICES_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/notices_data.json';
   const LIVE_NOTICES_STORAGE_KEY = 'tsc_live_synced_notices_v1';
-  const CURRENT_APP_VERSION = '1.0';
+  const CURRENT_APP_VERSION = '1.1';
   const GITHUB_VERSION_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/version.json';
   const LAST_SEEN_NOTICE_KEY = 'tsc_last_seen_notice_id_v1';
   const UPDATE_DISMISSED_KEY = 'tsc_update_dismissed_until';
@@ -531,6 +531,57 @@
     }).join('');
   }
 
+  // --- SOUND & DISPLAY NOTIFICATIONS ---
+  function playNotificationChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const now = ctx.currentTime;
+      // Tone 1: 587.33 Hz (D5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now);
+      gain1.gain.setValueAtTime(0.18, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+
+      // Tone 2: 880.00 Hz (A5)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880.00, now + 0.12);
+      gain2.gain.setValueAtTime(0.25, now + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.12);
+      osc2.stop(now + 0.55);
+    } catch (_) {}
+  }
+
+  function triggerSystemNotification(notice) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      try {
+        new Notification('📢 নতুন নোটিশ: ' + (notice.category_name || 'ডিটিই'), {
+          body: notice.title,
+          icon: 'assets/icon.png',
+          tag: notice.id
+        });
+      } catch (_) {}
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+  }
+
   // --- NOTICE ALERTS & UNREAD BADGES ---
   function checkNewNoticesAlert() {
     if (!rawNotices || rawNotices.length === 0) return;
@@ -545,6 +596,8 @@
       if (banner && activeTab !== 'notices') {
         if (bannerTitle) bannerTitle.textContent = rawNotices[0].title;
         banner.style.display = 'flex';
+        playNotificationChime();
+        triggerSystemNotification(rawNotices[0]);
       }
     } else {
       if (unreadDot) unreadDot.style.display = 'none';
@@ -840,6 +893,13 @@
     setupListeners();
     renderInstitutions();
     checkNewNoticesAlert();
+    // Ask for notification permission on first click
+    document.addEventListener('click', function reqNotif() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+      document.removeEventListener('click', reqNotif);
+    }, { once: true });
     // Silent background check if online
     setTimeout(() => {
       if (navigator.onLine) {
