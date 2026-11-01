@@ -74,6 +74,19 @@
   <!-- Main Views Container -->
   <main class="main-content">
     
+    <!-- New Notice Floating Alert Banner -->
+    <div id="new-notice-banner" class="new-notice-banner" style="display: none;">
+      <div class="banner-content">
+        <span class="banner-icon">🔔</span>
+        <div class="banner-text">
+          <span class="banner-label">নতুন নোটিশ এসেছে!</span>
+          <span class="banner-title" id="banner-notice-title"></span>
+        </div>
+      </div>
+      <button class="banner-action-btn" onclick="window.TSC_APP.openNoticesFromBanner()">দেখুন ❯</button>
+      <button class="banner-dismiss-btn" onclick="window.TSC_APP.dismissNoticeBanner()" title="বন্ধ করুন">✕</button>
+    </div>
+    
     <!-- View 1: Institutions List -->
     <section id="view-institutions" class="view-section active">
       <div id="tsc-grid" class="tsc-grid"></div>
@@ -147,6 +160,17 @@
           <a href="http://www.bteb.gov.bd" target="_blank" style="color: var(--primary); text-decoration: none;">🔗 বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB)</a>
         </div>
       </div>
+      <!-- App Version & Update Check Card -->
+      <div class="tsc-card" style="margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: var(--text-main);">অ্যাপ ভার্সন ও আপডেট</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">বর্তমান সংস্করণ: <span id="current-ver-label">১.০</span></div>
+        </div>
+        <button class="notice-btn primary" id="check-update-btn" onclick="window.TSC_APP.checkAppUpdate(true)" style="padding: 6px 14px; font-size: 12px;">
+          <span>🔄</span>
+          <span>আপডেট চেক</span>
+        </button>
+      </div>
     </section>
 
     <!-- Footer Developer Credit -->
@@ -169,6 +193,7 @@
     <button class="nav-tab" data-tab="notices">
       <span class="nav-tab-icon">📢</span>
       <span>নোটিশ</span>
+      <span class="nav-badge-dot" id="notice-unread-dot" style="display: none;"></span>
     </button>
     <button class="nav-tab" data-tab="favorites">
       <span class="nav-tab-icon">⭐</span>
@@ -196,6 +221,35 @@
         <button id="modal-tab-staff" class="sheet-tab-btn" onclick="window.TSC_APP.switchModalTab('staff')">কর্মচারী</button>
       </div>
       <div id="sheet-body" class="sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- App Update Prompt Modal -->
+  <div id="update-modal" class="modal-overlay">
+    <div class="modal-sheet update-sheet">
+      <div class="sheet-handle"></div>
+      <div style="text-align: center; padding: 12px 18px 22px 18px;">
+        <div style="font-size: 44px; margin-bottom: 4px;">🚀</div>
+        <span class="notice-badge dte_general" style="font-size: 11px;">নতুন সংস্করণ এসেছে!</span>
+        <h2 id="update-title" style="font-size: 19px; font-weight: 800; color: var(--text-main); margin-top: 10px;">নতুন ভার্সন উপলব্ধ</h2>
+        <p id="update-version-label" style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">ভার্সন v1.1</p>
+        
+        <div style="text-align: left; background: var(--bg-hover); border-radius: 12px; padding: 14px; margin: 16px 0; border: 1px solid var(--border-color);">
+          <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">✨ নতুন যা যা যুক্ত হয়েছে:</div>
+          <ul id="update-features-list" style="font-size: 12px; color: var(--text-muted); line-height: 1.8; padding-left: 18px; margin: 0;">
+          </ul>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <a id="update-download-btn" href="https://github.com/sakibs13/tsc-directory/releases/download/v1.0/Bangladesh-TSC-Directory-v1.0.apk" target="_blank" class="notice-btn primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 12px; text-decoration: none;">
+            <span>📥</span>
+            <span>নতুন ভার্সন ডাউনলোড ও আপডেট</span>
+          </a>
+          <button class="notice-btn outline" onclick="window.TSC_APP.closeUpdateModal()" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px; border-radius: 12px;">
+            <span>পরে মনে করিয়ে দিন</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

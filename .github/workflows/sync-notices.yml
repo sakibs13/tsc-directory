@@ -1,0 +1,36 @@
+name: Auto Sync Official Notices (Every 2 Hours)
+
+on:
+  schedule:
+    # Runs every 2 hours
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Allows manual trigger anytime
+
+jobs:
+  sync-notices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch and Sync Notices
+        env:
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          ONESIGNAL_REST_KEY: ${{ secrets.ONESIGNAL_REST_KEY }}
+        run: |
+          python sync_notices.py
+
+      - name: Commit and Push if new notices detected
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add www/data/notices_data.json www/data/notices_data.js
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto Update: Fresh Official Notices from DTE & BTEB" && git push)

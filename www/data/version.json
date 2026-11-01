@@ -1,0 +1,15 @@
+{
+  "version": "1.1",
+  "versionCode": 2,
+  "releaseDate": "2026-11-01",
+  "title": "নতুন ভার্সন ১.১ উপলব্ধ!",
+  "whatsNew": [
+    "🏛️ কারিগরি শিক্ষা অধিদপ্তর (DTE) সাধারণ ও প্রশিক্ষণ আদেশ নোটিশ",
+    "📜 কারিগরি শিক্ষা বোর্ড (BTEB) সাধারণ নোটিশ",
+    "📄 ১-ক্লিকে সরকারি ওরাকল ক্লাউড থেকে অফিশিয়াল PDF দেখা ও ডাউনলোড",
+    "⚡ প্রতি ২ ঘণ্টা পর পর স্বয়ংক্রিয় নোটিশ আপডেট",
+    "🔔 নতুন নোটিশ অ্যালার্ট এবং ইন-অ্যাপ আপডেট নোটিফিকেশন"
+  ],
+  "downloadUrl": "https://github.com/sakibs13/tsc-directory/releases/download/v1.0/Bangladesh-TSC-Directory-v1.0.apk",
+  "forceUpdate": false
+}

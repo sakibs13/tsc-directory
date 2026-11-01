@@ -353,6 +353,8 @@ def crawl_official_notices():
         with open('www/data/notices_data.js', 'w', encoding='utf-8') as f:
             f.write('window.NOTICES_DATA = ' + json.dumps(all_notices, ensure_ascii=False) + ';')
         print(f"Successfully updated {len(all_notices)} official notices!")
+        return all_notices
+    return []
 
 def main():
     json_path = 'www/data/tsc_data.json'

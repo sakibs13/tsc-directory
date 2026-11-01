@@ -6,6 +6,10 @@
   const LIVE_STORAGE_KEY = 'tsc_live_synced_data_v1';
   const GITHUB_NOTICES_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/notices_data.json';
   const LIVE_NOTICES_STORAGE_KEY = 'tsc_live_synced_notices_v1';
+  const CURRENT_APP_VERSION = '1.0';
+  const GITHUB_VERSION_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/version.json';
+  const LAST_SEEN_NOTICE_KEY = 'tsc_last_seen_notice_id_v1';
+  const UPDATE_DISMISSED_KEY = 'tsc_update_dismissed_until';
 
   let rawNotices = window.NOTICES_DATA || [];
   let activeNoticeCat = 'all';
@@ -527,6 +531,101 @@
     }).join('');
   }
 
+  // --- NOTICE ALERTS & UNREAD BADGES ---
+  function checkNewNoticesAlert() {
+    if (!rawNotices || rawNotices.length === 0) return;
+    const latestId = rawNotices[0].id || rawNotices[0].title;
+    const lastSeen = localStorage.getItem(LAST_SEEN_NOTICE_KEY);
+    const unreadDot = document.getElementById('notice-unread-dot');
+    const banner = document.getElementById('new-notice-banner');
+    const bannerTitle = document.getElementById('banner-notice-title');
+
+    if (lastSeen !== latestId) {
+      if (unreadDot) unreadDot.style.display = 'block';
+      if (banner && activeTab !== 'notices') {
+        if (bannerTitle) bannerTitle.textContent = rawNotices[0].title;
+        banner.style.display = 'flex';
+      }
+    } else {
+      if (unreadDot) unreadDot.style.display = 'none';
+      if (banner) banner.style.display = 'none';
+    }
+  }
+
+  function dismissNoticeBanner() {
+    const banner = document.getElementById('new-notice-banner');
+    if (banner) banner.style.display = 'none';
+    if (rawNotices && rawNotices.length > 0) {
+      const latestId = rawNotices[0].id || rawNotices[0].title;
+      localStorage.setItem(LAST_SEEN_NOTICE_KEY, latestId);
+    }
+    const unreadDot = document.getElementById('notice-unread-dot');
+    if (unreadDot) unreadDot.style.display = 'none';
+  }
+
+  function openNoticesFromBanner() {
+    dismissNoticeBanner();
+    switchTab('notices');
+  }
+
+  // --- IN-APP UPDATE SYSTEM ---
+  async function checkAppUpdate(isManual = false) {
+    const checkBtn = document.getElementById('check-update-btn');
+    if (isManual && checkBtn) checkBtn.classList.add('rotating');
+
+    try {
+      const res = await fetch(GITHUB_VERSION_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const info = await res.json();
+        const remoteVer = parseFloat(info.version || '1.0');
+        const currentVer = parseFloat(CURRENT_APP_VERSION);
+
+        if (remoteVer > currentVer) {
+          const dismissedUntil = parseInt(localStorage.getItem(UPDATE_DISMISSED_KEY) || '0', 10);
+          if (isManual || Date.now() > dismissedUntil) {
+            showUpdateModal(info);
+            return;
+          }
+        } else if (isManual) {
+          showToast('আপনি লেটেস্ট সংস্করণ (' + CURRENT_APP_VERSION + ') ব্যবহার করছেন 👍');
+        }
+      } else if (isManual) {
+        showToast('আপডেট তথ্য লোড করা যায়নি।');
+      }
+    } catch (err) {
+      console.warn('Update check error:', err);
+      if (isManual) showToast('ইন্টারনেট সংযোগ চেক করুন।');
+    } finally {
+      if (isManual && checkBtn) checkBtn.classList.remove('rotating');
+    }
+  }
+
+  function showUpdateModal(info) {
+    const modal = document.getElementById('update-modal');
+    if (!modal) return;
+    const titleEl = document.getElementById('update-title');
+    const verEl = document.getElementById('update-version-label');
+    const listEl = document.getElementById('update-features-list');
+    const btnEl = document.getElementById('update-download-btn');
+
+    if (titleEl && info.title) titleEl.textContent = info.title;
+    if (verEl && info.version) verEl.textContent = 'ভার্সন v' + info.version;
+    if (btnEl && info.downloadUrl) btnEl.href = info.downloadUrl;
+    if (listEl && Array.isArray(info.whatsNew)) {
+      listEl.innerHTML = info.whatsNew.map(item => `<li>${item}</li>`).join('');
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeUpdateModal() {
+    const modal = document.getElementById('update-modal');
+    if (modal) modal.classList.remove('active');
+    document.body.style.overflow = '';
+    localStorage.setItem(UPDATE_DISMISSED_KEY, String(Date.now() + 24 * 3600 * 1000));
+  }
+
   // --- TAB NAVIGATION ---
   function switchTab(tabName) {
     activeTab = tabName;
@@ -561,6 +660,7 @@
     } else if (tabName === 'directory' || tabName === 'favorites') {
       renderOfficers();
     } else if (tabName === 'notices') {
+      dismissNoticeBanner();
       renderNotices();
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -720,6 +820,7 @@
           if (Array.isArray(freshN) && freshN.length > 0) {
             localStorage.setItem(LIVE_NOTICES_STORAGE_KEY, JSON.stringify(freshN));
             rawNotices = freshN;
+            checkNewNoticesAlert();
             if (activeTab === 'notices') renderNotices();
           }
         }
@@ -738,10 +839,12 @@
     initData();
     setupListeners();
     renderInstitutions();
+    checkNewNoticesAlert();
     // Silent background check if online
     setTimeout(() => {
       if (navigator.onLine) {
         syncFromGitHub(false);
+        checkAppUpdate(false);
       }
     }, 2500);
   });
@@ -756,6 +859,10 @@
     switchTab,
     toggleTheme,
     syncFromGitHub,
+    checkAppUpdate,
+    closeUpdateModal,
+    openNoticesFromBanner,
+    dismissNoticeBanner,
     activeModalCollege: null
   };
 })();
