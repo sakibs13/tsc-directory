@@ -812,3 +812,139 @@ body {
 .load-more-btn:active {
   background: var(--badge-bg);
 }
+
+
+/* Notice Board Styles */
+.notices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.notice-card.dte_general {
+  border-left-color: #0d9488;
+}
+
+.notice-card.dte_training {
+  border-left-color: #f59e0b;
+}
+
+.notice-card.bteb_general {
+  border-left-color: #3b82f6;
+}
+
+.notice-card:active {
+  transform: scale(0.99);
+}
+
+.notice-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.notice-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notice-badge.dte_general {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+}
+
+.notice-badge.dte_training {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.notice-badge.bteb_general {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.notice-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notice-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+.notice-issue {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--badge-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.notice-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px dashed var(--card-border);
+  padding-top: 10px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.notice-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.notice-btn.primary {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
+.notice-btn.outline {
+  background: var(--badge-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+}
+
+.notice-btn:active {
+  transform: scale(0.95);
+}

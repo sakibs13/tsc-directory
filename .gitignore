@@ -2,3 +2,5 @@ node_modules/
 .vscode/
 .idea/
 *.log
+__pycache__/
+*.pyc

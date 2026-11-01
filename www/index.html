@@ -87,7 +87,21 @@
       </div>
     </section>
 
-    <!-- View 3: Favorites -->
+        <!-- View 3: Official Notices Board -->
+    <section id="view-notices" class="view-section">
+      <!-- Notice Categories Bar -->
+      <div class="filter-scroll-wrapper" id="notice-chips" style="padding: 0 0 10px 0;">
+        <button class="filter-chip active" data-notice-cat="all">সব নোটিশ</button>
+        <button class="filter-chip" data-notice-cat="dte_general">🏛️ ডিটিই সাধারণ</button>
+        <button class="filter-chip" data-notice-cat="dte_training">🎓 প্রশিক্ষণ আদেশ</button>
+        <button class="filter-chip" data-notice-cat="bteb_general">📜 বিটিইবি নোটিশ</button>
+      </div>
+
+      <!-- Notices Cards List -->
+      <div id="notices-list" class="notices-list"></div>
+    </section>
+
+    <!-- View 4: Favorites -->
     <section id="view-favorites" class="view-section">
       <div id="officer-list" class="officer-list"></div>
     </section>
@@ -150,7 +164,11 @@
     </button>
     <button class="nav-tab" data-tab="directory">
       <span class="nav-tab-icon">👥</span>
-      <span>শিক্ষক তালিকা</span>
+      <span>শিক্ষক</span>
+    </button>
+    <button class="nav-tab" data-tab="notices">
+      <span class="nav-tab-icon">📢</span>
+      <span>নোটিশ</span>
     </button>
     <button class="nav-tab" data-tab="favorites">
       <span class="nav-tab-icon">⭐</span>
@@ -186,6 +204,7 @@
 
   <!-- Data & Application Logic -->
   <script src="data/tsc_data.js"></script>
+  <script src="data/notices_data.js"></script>
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

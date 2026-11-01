@@ -4,6 +4,11 @@
   // --- STATE ---
   const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/tsc_data.json';
   const LIVE_STORAGE_KEY = 'tsc_live_synced_data_v1';
+  const GITHUB_NOTICES_URL = 'https://raw.githubusercontent.com/sakibs13/tsc-directory/main/www/data/notices_data.json';
+  const LIVE_NOTICES_STORAGE_KEY = 'tsc_live_synced_notices_v1';
+
+  let rawNotices = window.NOTICES_DATA || [];
+  let activeNoticeCat = 'all';
 
   let rawData = window.TSC_DATA || [];
   let allOfficers = [];
@@ -25,6 +30,16 @@
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length >= 150) {
           rawData = parsed;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const cachedNotices = localStorage.getItem(LIVE_NOTICES_STORAGE_KEY);
+      if (cachedNotices) {
+        const parsedN = JSON.parse(cachedNotices);
+        if (Array.isArray(parsedN) && parsedN.length > 0) {
+          rawNotices = parsedN;
         }
       }
     } catch (_) {}
@@ -447,6 +462,71 @@
     }, 2400);
   }
 
+  // --- RENDER NOTICES ---
+  function renderNotices() {
+    const container = document.getElementById('notices-list');
+    const statsElem = document.getElementById('stats-text');
+    if (!container) return;
+
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = rawNotices.filter(n => {
+      if (activeNoticeCat !== 'all' && n.category_id !== activeNoticeCat) return false;
+      if (!q) return true;
+      const combined = `${n.title} ${n.category_name} ${n.authority} ${n.date} ${n.issue_no}`.toLowerCase();
+      return combined.includes(q);
+    });
+
+    if (statsElem) {
+      statsElem.innerHTML = `মোট নোটিশ: <span class="stats-count">${filtered.length}</span> টি`;
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📢</div>
+          <div class="empty-title">কোনো নোটিশ পাওয়া যায়নি</div>
+          <div class="empty-desc">অনুসন্ধান বা ক্যাটাগরি পরিবর্তন করে আবার চেষ্টা করুন</div>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(n => {
+      const catClass = n.category_id || 'dte_general';
+      return `
+        <div class="notice-card ${catClass}">
+          <div class="notice-card-header">
+            <span class="notice-badge ${catClass}">📌 ${n.category_name}</span>
+            <span class="notice-date">📅 ${n.date || 'হালনাগাদ'}</span>
+          </div>
+          ${n.issue_no ? `<div class="notice-issue">🔢 স্মারক নং: ${n.issue_no}</div>` : ''}
+          <div class="notice-title">${n.title}</div>
+          <div style="font-size: 11px; color: var(--text-muted); display:flex; align-items:center; gap:4px;">
+            <span>🏛️</span>
+            <span>${n.authority}</span>
+          </div>
+          <div class="notice-actions">
+            ${n.pdf_url ? `
+              <a href="${n.pdf_url}" target="_blank" rel="noopener" class="notice-btn primary" title="পিডিএফ ডাউনলোড বা দেখুন">
+                <span>📄</span>
+                <span>PDF দেখুন / ডাউনলোড</span>
+              </a>
+            ` : ''}
+            ${n.detail_url ? `
+              <a href="${n.detail_url}" target="_blank" rel="noopener" class="notice-btn outline" title="অফিসিয়াল ওয়েবসাইট দেখুন">
+                <span>🌐</span>
+                <span>মূল পেজ</span>
+              </a>
+            ` : ''}
+            <button class="notice-btn outline" onclick="window.TSC_APP.copyText('${n.pdf_url || n.detail_url}', 'নোটিশ লিংক কপি করা হয়েছে!')" title="লিংক কপি করুন">
+              <span>📋</span>
+              <span>কপি লিংক</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   // --- TAB NAVIGATION ---
   function switchTab(tabName) {
     activeTab = tabName;
@@ -465,16 +545,23 @@
     const target = document.getElementById(`view-${tabName}`);
     if (target) target.classList.add('active');
 
-    // Show/hide filter pills based on tab
+    // Show/hide filter pills & dropdowns based on tab
     const rolePills = document.getElementById('role-chips');
     if (rolePills) {
       rolePills.style.display = (tabName === 'directory' || tabName === 'favorites') ? 'flex' : 'none';
+    }
+
+    const geoFilters = document.querySelector('.filter-dropdowns');
+    if (geoFilters) {
+      geoFilters.style.display = (tabName === 'institutions' || tabName === 'directory') ? 'grid' : 'none';
     }
 
     if (tabName === 'institutions') {
       renderInstitutions();
     } else if (tabName === 'directory' || tabName === 'favorites') {
       renderOfficers();
+    } else if (tabName === 'notices') {
+      renderNotices();
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -511,6 +598,7 @@
         if (clearBtn) clearBtn.style.display = searchQuery ? 'block' : 'none';
         displayedCount = PAGE_SIZE;
         if (activeTab === 'institutions') renderInstitutions();
+        else if (activeTab === 'notices') renderNotices();
         else renderOfficers();
       });
     }
@@ -522,12 +610,23 @@
         clearBtn.style.display = 'none';
         displayedCount = PAGE_SIZE;
         if (activeTab === 'institutions') renderInstitutions();
+        else if (activeTab === 'notices') renderNotices();
         else renderOfficers();
       });
     }
 
+    // Notice category chips
+    document.querySelectorAll('[data-notice-cat]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('[data-notice-cat]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeNoticeCat = chip.getAttribute('data-notice-cat');
+        renderNotices();
+      });
+    });
+
     // Role chips
-    document.querySelectorAll('.filter-chip').forEach(chip => {
+    document.querySelectorAll('#role-chips .filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
@@ -546,6 +645,7 @@
         updateDistrictOptions();
         displayedCount = PAGE_SIZE;
         if (activeTab === 'institutions') renderInstitutions();
+        else if (activeTab === 'notices') renderNotices();
         else renderOfficers();
       });
     }
@@ -557,6 +657,7 @@
         districtFilter = e.target.value;
         displayedCount = PAGE_SIZE;
         if (activeTab === 'institutions') renderInstitutions();
+        else if (activeTab === 'notices') renderNotices();
         else renderOfficers();
       });
     }
@@ -610,6 +711,19 @@
           showToast('অ্যাপের তথ্য ইতিমধ্যে সম্পূর্ণ আপ-টু-ডেট আছে 👍');
         }
       }
+
+      // Sync Notices as well
+      try {
+        const resN = await fetch(GITHUB_NOTICES_URL + '?t=' + Date.now(), { cache: 'no-store' });
+        if (resN.ok) {
+          const freshN = await resN.json();
+          if (Array.isArray(freshN) && freshN.length > 0) {
+            localStorage.setItem(LIVE_NOTICES_STORAGE_KEY, JSON.stringify(freshN));
+            rawNotices = freshN;
+            if (activeTab === 'notices') renderNotices();
+          }
+        }
+      } catch (_) {}
     } catch (err) {
       console.warn('Live sync notice:', err);
       if (isManual) showToast('ইন্টারনেট সংযোগ নেই, অফলাইন ডাটা সচল আছে।');

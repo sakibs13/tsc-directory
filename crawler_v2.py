@@ -270,6 +270,90 @@ def process_college(inst):
     }
 
 
+
+# --- OFFICIAL NOTICES CRAWLER (DTE & BTEB) ---
+def parse_notice_rows(html, base_url, category_id, category_name, authority_name):
+    if not html:
+        return []
+    trs = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
+    if len(trs) < 2:
+        return []
+    notices = []
+    for tr in trs[1:]:
+        tds = re.findall(r'<td[^>]*>(.*?)</td>', tr, re.DOTALL)
+        if len(tds) < 3:
+            continue
+        texts = [" ".join(re.sub(r'<[^>]+>', ' ', td).split()) for td in tds]
+        links = re.findall(r'href=[\'"]([^\'"]+)[\'"]', tr)
+        title, date_str, issue_no = "", "", ""
+        for t in texts:
+            if not title and len(t) > 10 and not re.search(r'^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}$', t):
+                title = t
+            elif re.search(r'\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}', t):
+                date_str = t
+            elif re.search(r'^\d{2,6}$', t) or re.search(r'^[০-৯]{2,6}$', t):
+                issue_no = t
+        if not title:
+            continue
+        pdf_url, detail_url = "", ""
+        for l in links:
+            full = l if l.startswith('http') else base_url + l
+            if '.pdf' in l.lower() or 'objectstorage' in l.lower():
+                pdf_url = full
+            elif ('notices' in l.lower() or 'go-ultimates' in l.lower()) and not detail_url:
+                detail_url = full
+        notices.append({
+            'id': f"{category_id}-{len(notices)+1}",
+            'title': title,
+            'date': date_str,
+            'issue_no': issue_no,
+            'category_id': category_id,
+            'category_name': category_name,
+            'authority': authority_name,
+            'pdf_url': pdf_url,
+            'detail_url': detail_url
+        })
+    return notices
+
+def crawl_official_notices():
+    configs = [
+        {
+            'category_id': 'dte_general',
+            'category_name': 'ডিটিই সাধারণ নোটিশ',
+            'authority': 'কারিগরি শিক্ষা অধিদপ্তর (DTE)',
+            'base_url': 'https://techedu.gov.bd',
+            'url': 'https://techedu.gov.bd/pages/notices'
+        },
+        {
+            'category_id': 'dte_training',
+            'category_name': 'ডিটিই প্রশিক্ষণ আদেশ',
+            'authority': 'কারিগরি শিক্ষা অধিদপ্তর (DTE)',
+            'base_url': 'https://techedu.gov.bd',
+            'url': 'https://techedu.gov.bd/pages/go-ultimates?filters=%7B%22order%22%3A%22691995f1933eb65569ddc2e1%22%7D'
+        },
+        {
+            'category_id': 'bteb_general',
+            'category_name': 'বিটিইবি সাধারণ নোটিশ',
+            'authority': 'বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB)',
+            'base_url': 'https://bteb.gov.bd',
+            'url': 'https://bteb.gov.bd/pages/notices'
+        }
+    ]
+    all_notices = []
+    print("Crawling Official Notices from DTE & BTEB...")
+    for cfg in configs:
+        html = fetch_url(cfg['url'])
+        items = parse_notice_rows(html, cfg['base_url'], cfg['category_id'], cfg['category_name'], cfg['authority'])
+        print(f"  [{cfg['category_id']}] Extracted {len(items)} notices")
+        all_notices.extend(items)
+
+    if all_notices:
+        with open('www/data/notices_data.json', 'w', encoding='utf-8') as f:
+            json.dump(all_notices, f, ensure_ascii=False, indent=2)
+        with open('www/data/notices_data.js', 'w', encoding='utf-8') as f:
+            f.write('window.NOTICES_DATA = ' + json.dumps(all_notices, ensure_ascii=False) + ';')
+        print(f"Successfully updated {len(all_notices)} official notices!")
+
 def main():
     json_path = 'www/data/tsc_data.json'
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -327,6 +411,7 @@ def main():
     with open('crawl_summary.txt', 'w', encoding='utf-8') as f:
         f.write("\n".join(results_log))
     print("Summary written to crawl_summary.txt")
+    crawl_official_notices()
 
 
 if __name__ == '__main__':
