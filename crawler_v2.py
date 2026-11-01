@@ -352,6 +352,27 @@ def crawl_official_notices():
             json.dump(all_notices, f, ensure_ascii=False, indent=2)
         with open('www/data/notices_data.js', 'w', encoding='utf-8') as f:
             f.write('window.NOTICES_DATA = ' + json.dumps(all_notices, ensure_ascii=False) + ';')
+        
+        # Update NOTICES_DATA in tsc_directory_app.html
+        html_file = 'tsc_directory_app.html'
+        if os.path.exists(html_file):
+            try:
+                with open(html_file, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                updated_html, cnt = re.subn(
+                    r'let NOTICES_DATA = \[.*?\];',
+                    lambda m: 'let NOTICES_DATA = ' + json.dumps(all_notices, ensure_ascii=False) + ';',
+                    html_content,
+                    count=1,
+                    flags=re.S
+                )
+                if cnt == 1:
+                    with open(html_file, 'w', encoding='utf-8') as f:
+                        f.write(updated_html)
+                    print("Successfully updated NOTICES_DATA inside tsc_directory_app.html!")
+            except Exception as e:
+                print(f"Notice HTML update error: {e}")
+
         print(f"Successfully updated {len(all_notices)} official notices!")
         return all_notices
     return []
