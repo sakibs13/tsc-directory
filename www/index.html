@@ -103,11 +103,17 @@
         <!-- View 3: Official Notices Board -->
     <section id="view-notices" class="view-section">
       <!-- Notice Categories Bar -->
-      <div class="filter-scroll-wrapper" id="notice-chips" style="padding: 0 0 10px 0;">
-        <button class="filter-chip active" data-notice-cat="all">সব নোটিশ</button>
-        <button class="filter-chip" data-notice-cat="dte_general">🏛️ ডিটিই সাধারণ</button>
-        <button class="filter-chip" data-notice-cat="dte_training">🎓 প্রশিক্ষণ আদেশ</button>
-        <button class="filter-chip" data-notice-cat="bteb_general">📜 বিটিইবি নোটিশ</button>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+        <div class="filter-scroll-wrapper" id="notice-chips" style="padding: 0; margin-bottom: 0; flex: 1;">
+          <button class="filter-chip active" data-notice-cat="all">সব নোটিশ</button>
+          <button class="filter-chip" data-notice-cat="dte_general">🏛️ ডিটিই সাধারণ</button>
+          <button class="filter-chip" data-notice-cat="dte_training">🎓 প্রশিক্ষণ আদেশ</button>
+          <button class="filter-chip" data-notice-cat="bteb_general">📜 বিটিইবি নোটিশ</button>
+        </div>
+        <button id="notice-refresh-btn" class="notice-btn outline" onclick="window.TSC_APP.syncNoticesOnly(true)" title="নতুন নোটিশ রিফ্রেশ করুন" style="flex-shrink: 0; padding: 6px 12px; font-size: 11px;">
+          <span id="notice-refresh-icon">🔄</span>
+          <span>রিফ্রেশ</span>
+        </button>
       </div>
 
       <!-- Notices Cards List -->

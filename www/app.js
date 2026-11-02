@@ -715,6 +715,7 @@
     } else if (tabName === 'notices') {
       dismissNoticeBanner();
       renderNotices();
+      syncNoticesOnly(false);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -840,6 +841,40 @@
     }
   }
 
+  // --- INDEPENDENT NOTICE SYNC ---
+  async function syncNoticesOnly(isManual = false) {
+    const refreshIcon = document.getElementById('notice-refresh-icon');
+    if (refreshIcon) refreshIcon.classList.add('rotating');
+    if (isManual) showToast('নোটিশ হালনাগাদ চেক করা হচ্ছে...');
+
+    try {
+      const resN = await fetch(GITHUB_NOTICES_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (resN.ok) {
+        const freshN = await resN.json();
+        if (Array.isArray(freshN) && freshN.length > 0) {
+          const oldStr = localStorage.getItem(LIVE_NOTICES_STORAGE_KEY) || JSON.stringify(window.NOTICES_DATA || []);
+          const newStr = JSON.stringify(freshN);
+          if (oldStr !== newStr) {
+            localStorage.setItem(LIVE_NOTICES_STORAGE_KEY, newStr);
+            rawNotices = freshN;
+            checkNewNoticesAlert();
+            if (activeTab === 'notices') renderNotices();
+            if (isManual) showToast('✨ নতুন নোটিশ হালনাগাদ সম্পন্ন!');
+          } else if (isManual) {
+            showToast('নোটিশ বোর্ড ইতিমধ্যে সম্পূর্ণ আপ-টু-ডেট আছে 👍');
+          }
+        }
+      } else if (isManual) {
+        showToast('সার্ভার থেকে নোটিশ লোড করা যায়নি।');
+      }
+    } catch (err) {
+      console.warn('Notice sync error:', err);
+      if (isManual) showToast('ইন্টারনেট সংযোগ চেক করুন।');
+    } finally {
+      if (refreshIcon) refreshIcon.classList.remove('rotating');
+    }
+  }
+
   // --- REMOTE GITHUB SYNC ---
   async function syncFromGitHub(isManual = false) {
     const syncBtn = document.getElementById('sync-data-btn');
@@ -893,6 +928,7 @@
     setupListeners();
     renderInstitutions();
     checkNewNoticesAlert();
+    syncNoticesOnly(false);
     // Ask for notification permission on first click
     document.addEventListener('click', function reqNotif() {
       if ('Notification' in window && Notification.permission === 'default') {
@@ -919,6 +955,7 @@
     switchTab,
     toggleTheme,
     syncFromGitHub,
+    syncNoticesOnly,
     checkAppUpdate,
     closeUpdateModal,
     openNoticesFromBanner,
