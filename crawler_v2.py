@@ -300,7 +300,7 @@ def parse_notice_rows(html, base_url, category_id, category_name, authority_name
             full = l if l.startswith('http') else base_url + l
             if '.pdf' in l.lower() or 'objectstorage' in l.lower():
                 pdf_url = full
-            elif ('notices' in l.lower() or 'go-ultimates' in l.lower()) and not detail_url:
+            elif ('notices' in l.lower() or 'go-ultimates' in l.lower() or 'notification-circulars' in l.lower()) and not detail_url:
                 detail_url = full
         notices.append({
             'id': f"{category_id}-{len(notices)+1}",
@@ -337,10 +337,17 @@ def crawl_official_notices():
             'authority': 'বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB)',
             'base_url': 'https://bteb.gov.bd',
             'url': 'https://bteb.gov.bd/pages/notices'
+        },
+        {
+            'category_id': 'tmed_circular',
+            'category_name': 'টিএমইডি প্রজ্ঞাপন',
+            'authority': 'কারিগরি ও মাদ্রাসা শিক্ষা বিভাগ (TMED)',
+            'base_url': 'https://tmed.gov.bd',
+            'url': 'https://tmed.gov.bd/pages/notification-circulars'
         }
     ]
     all_notices = []
-    print("Crawling Official Notices from DTE & BTEB...")
+    print("Crawling Official Notices from DTE, BTEB & TMED...")
     for cfg in configs:
         html = fetch_url(cfg['url'])
         items = parse_notice_rows(html, cfg['base_url'], cfg['category_id'], cfg['category_name'], cfg['authority'])

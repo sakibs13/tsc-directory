@@ -1070,3 +1070,12 @@ body {
     margin: 40px auto;
   }
 }
+
+.notice-card.tmed_circular {
+  border-left-color: #8b5cf6;
+}
+
+.notice-badge.tmed_circular {
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+}
