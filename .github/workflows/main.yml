@@ -43,11 +43,18 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Generate Official Release Keystore
+      - name: Setup Official Permanent Release Keystore
         run: |
-          keytool -genkey -v -keystore release.keystore -alias tsc-release -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "tsc2026sakib" -keypass "tsc2026sakib" \
-            -dname "CN=Md. Nazmus Sakib, OU=Technical Education, O=Bangladesh Govt TSC, L=Hajiganj, ST=Chandpur, C=BD"
+          if [ ! -f "release.keystore" ]; then
+            keytool -genkey -v -keystore release.keystore -alias tsc-release -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "tsc2026sakib" -keypass "tsc2026sakib" \
+              -dname "CN=Md. Nazmus Sakib, OU=Technical Education, O=Bangladesh Govt TSC, L=Hajiganj, ST=Chandpur, C=BD"
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git add release.keystore
+            git commit -m "Save permanent release keystore for consistent APK signing" || true
+            git push || true
+          fi
 
       - name: Build Release APK and App Bundle
         run: |
