@@ -1,9 +1,9 @@
-name: Auto Sync Official Notices (Hourly)
+name: Auto Sync Official Notices (Daily at 2 PM & 7 PM BST)
 
 on:
   schedule:
-    # Runs hourly at minute 25 (avoids top-of-hour GitHub queue delays)
-    - cron: '25 * * * *'
+    # Runs daily at 2:00 PM BST (08:00 UTC) and 7:00 PM BST (13:00 UTC)
+    - cron: '0 8,13 * * *'
   workflow_dispatch: # Allows manual trigger anytime
 
 jobs:
